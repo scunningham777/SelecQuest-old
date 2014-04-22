@@ -1,0 +1,9 @@
+{
+	"name": "CrawlerQuest",
+	"description": "Choose your own time-management adventure",
+	"version": "0.0.1",
+	"private": true,
+	"dependencies": {
+		"express": "4.0.0"
+	}
+}
