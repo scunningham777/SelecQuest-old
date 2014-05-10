@@ -1,5 +1,9 @@
 describe('Crawler Quest Services', function() {
 	beforeEach(module('crawlerQuestApp'));
+
+	it('should contain a gameStateManager service', inject(function(gameStateManager) {
+		expect(gameStateManager).not.to.equal(null);
+	}));
 	
 	it('should contain a taskInstanceFactory service', inject(function(taskInstanceFactory) {
 		expect(taskInstanceFactory).not.to.equal(null);
@@ -34,33 +38,35 @@ describe('Crawler Quest Services', function() {
 		}));
 		
 		it('should start, store, and manually stop a task instance', function() {
-			var task = {'name':"testTask", 'duration':10000, 'id':'123'};
-			var newTaskInstance;
-			var startSuccess = function(taskInstance) {newTaskInstance = taskInstance};
-			taskManagerSvc.startNewTask(startSuccess, null, task);
+			var taskStartTime = new Date().getTime();
+			var newTaskInstance = {'name':"testTask", 'durationMillis':10000, 'id':'1234', 'startTime':taskStartTime};
+			var returnedTaskInstance;
+			var startSuccess = function(taskInstance) {returnedTaskInstance = taskInstance};
+			taskManagerSvc.startNewTaskInstance(newTaskInstance, startSuccess, null);
 			
 //			debugger
-			expect(taskManagerSvc.activeTaskInstances).to.include.keys('123');
-			expect(newTaskInstance.startTime).to.be.lessThan(new Date().getTime());
+			expect(taskManagerSvc.activeTaskInstances).to.include.keys('1234');
+			expect(returnedTaskInstance.startTime).to.be.lessThan(new Date().getTime());
 			
-			taskManagerSvc.removeTaskInstanceById(null, null, '123');
-			expect(taskManagerSvc.activeTaskInstances).not.to.include.keys('123');
+			taskManagerSvc.removeTaskInstanceById(null, null, '1234');
+			expect(taskManagerSvc.activeTaskInstances).not.to.include.keys('1234');
 		});
 		
-		it('should start and update a task instance', function() {
-			debugger
+		it('should start and automatically complete a task instance', function() {
+//			debugger
 			expect(taskManagerSvc.taskUpdateInterval).to.be.null;
 		
-			var task = {'name':"testTask", 'durationMillis':5000, 'id':'123'};
-			var newTaskInstance;
-			var startSuccess = function(taskInstance) {newTaskInstance = taskInstance};
-			taskManagerSvc.startNewTask(startSuccess, null, task);
+			var taskCompleteDelegate = function(onSuccess) {onSuccess();};
+			var taskCompleteSpy = chai.spy(taskCompleteDelegate);
+			var newTaskInstance = {'name':"testTask", 'durationMillis':500, 'id':'135', 'completionDelegate':taskCompleteDelegate};
+			var returnedTaskInstance;
+			var startSuccess = function(taskInstance) {returnedTaskInstance = taskInstance};
+			taskManagerSvc.startNewTaskInstance(newTaskInstance, startSuccess, null);
 			expect(taskManagerSvc.taskUpdateInterval).not.to.be.null;
 			
 			//actually test that the task has updated 
-			var checkAllTasksProgressSpy = chai.spy(taskManagerSvc.checkTaskProgressById);
 			interval.flush(600);
-			expect(checkAllTasksProgressSpy).to.have.been.called();
+			expect(taskCompleteSpy).to.have.been.called();
 		});
 	});
 });

@@ -3,43 +3,53 @@
  */
 angular.module('App.Services', [])
 
-	.factory('gameStateManager', ['taskManager', '$state', function(taskManager, $state) {
-		return {
-			newTaskSelected : function(selectedTask) {
-				taskManager.startNewTask(startNewTaskSuccess, null, selectedTask);
-				
-				function startNewTaskSuccess(startedTaskInstance) {
-					taskManager.clearAvailableTasksList();
-					//navigate to TaskProgressView
-					$state.go('progress', {'selectedActiveTaskInstance': startedTaskInstance.id}, {location:false});
-				};
-			},
+	.factory('gameStateManager', ['taskManager', 'taskInstanceFactory', '$state',  function(taskManager, taskInstanceFactory, $state) {
+		var self = {};
+
+		self.newTaskSelected = function(selectedTask) {
+			var newTaskInstance = taskInstanceFactory.generateNewTaskInstance(selectedTask, new Date().getTime(), self.taskInstanceCompleted);
+
+			taskManager.startNewTaskInstance(newTaskInstance, startNewTaskSuccess, null);
 			
-			taskInstanceCompleted : function(completedTaskInstance) {
-				//pass completedTaskInstance and generateTaskResultsSuccess to taskResultGenerator service
-				saveTaskResultsSuccess(null);
-				
-				function generateTaskResultsSuccess(taskResults){
-					//pass taskResults and saveTaskResultsSuccess to characterManager service
-				};
-				
-				function saveTaskResultsSuccess(taskResults) {
-					taskManager.removeTaskInstanceById(removeTaskInstanceSuccess, null, completedTaskInstance.id);			
-				};
-				
-				function removeTaskInstanceSuccess() {
-					//navigate to TaskHistoryview, informing it that a new task has completed
-				};
-			}
+			function startNewTaskSuccess(startedTaskInstance) {
+				//taskManager.clearAvailableTasksList();
+				//navigate to TaskProgressView
+				$state.go('activeTask', {'selectedActiveTaskInstance': startedTaskInstance.id}, {location:false});
+			};
 		};
+		
+		self.taskInstanceCompleted = function(completedTaskInstance) {
+			//pass completedTaskInstance and generateTaskResultsSuccess to taskResultGenerator service
+			saveTaskResultsSuccess(null);
+			
+			function generateTaskResultsSuccess(taskResults){
+				//pass taskResults and saveTaskResultsSuccess to characterManager service
+				console.log("task results generated!");
+			};
+			
+			function saveTaskResultsSuccess(taskResults) {
+//					taskManager.removeTaskInstanceById(completedTaskInstance.id, null, null);			
+			};
+			
+		};
+
+		return self;
 	}])
 	
 	.factory('taskInstanceFactory', function(){
-		self = {};
+		var self = {};
 		
-		self.generateNewTaskInstance = function(newTask, startTime) {
+		self.generateNewTaskInstance = function(newTask, startTime, completionDelegate) {
 			var finishTime = new Date(startTime + (newTask.durationMillis));
-			var newTaskInstance = {'id':newTask.id, 'name':newTask.name, 'durationMillis':newTask.durationMillis, 'startTime':startTime, 'finishTime': finishTime.getTime(), 'currentProgressPercent':0};
+			var newTaskInstance = {
+				'id':newTask.id, 
+				'name':newTask.name, 
+				'durationMillis':newTask.durationMillis, 
+				'startTime':startTime, 
+				'finishTime': finishTime.getTime(), 
+				'currentProgressPercent':0, 
+				'completionDelegate':completionDelegate
+			};
 			
 			return newTaskInstance;
 		}
@@ -47,19 +57,44 @@ angular.module('App.Services', [])
 		return self;
 	})
 
-    .factory('taskManager', ['taskInstanceFactory', /*'gameStateManager',*/ '$interval', '$state', function(taskInstanceFactory, /*gameStateManager,*/ $interval, $state) {
-        self = {};
-		self.availableTasksList = {};
+    .factory('taskManager', ['$interval', '$state', 'taskInstanceFactory', function($interval, $state, taskInstanceFactory) {
+        var self = {};
 		self.activeTaskInstances = {};
 		self.taskUpdateEnabled = false;
 		self.taskUpdateInterval = null;
 		
 		self.getActiveTaskInstanceById = function(requestedId) {
-			return self.activeTaskInstances[requestedId];
-		}
+			if (requestedId == null) {return null};
 
-		self.clearAvailableTasksList = function() {
-			self.availableTasksList = {};
+			return self.activeTaskInstances[requestedId];
+		};
+
+       self.startNewTaskInstance = function (newTaskInstance, onSuccess, onError) {
+			if(newTaskInstance == null) {
+				onError("Cannot start null task");
+			}
+		
+			self.activeTaskInstances[newTaskInstance.id] = newTaskInstance;
+			
+			self.startTaskUpdateInterval();
+		
+            onSuccess(newTaskInstance);
+        };
+		
+		self.removeTaskInstanceById = function(targetTaskId, onSuccess, onError)  {
+			if (self.activeTaskInstances.hasOwnProperty(targetTaskId)) {
+				delete self.activeTaskInstances[targetTaskId];
+				self.checkToCancelUpdateInterval();
+				if (onSuccess != null){
+					onSuccess(targetTaskId);
+				}
+			}
+			else {
+				self.checkToCancelUpdateInterval();
+				if (onError != null) {
+					onError(targetTaskId);
+				}
+			}
 		};
 		
 		self.startTaskUpdateInterval = function() {
@@ -77,42 +112,13 @@ angular.module('App.Services', [])
 			}
 		};
 		
-        self.startNewTask = function (onSuccess, onError, newTask) {
-			if(newTask == null) {
-				onError("Cannot start null task");
-			}
-		
-			var newTaskInstance = taskInstanceFactory.generateNewTaskInstance(newTask, new Date().getTime());
-		
-			self.activeTaskInstances[newTaskInstance.id] = newTaskInstance;
-			
-			self.startTaskUpdateInterval();
-		
-            onSuccess(newTaskInstance);
-        };
-		
-		self.removeTaskInstanceById = function( onSuccess, onError, targetTaskId)  {
-			if (self.activeTaskInstances.hasOwnProperty(targetTaskId)) {
-				delete self.activeTaskInstances[targetTaskId];
-				self.checkToCancelUpdateInterval();
-				if (onSuccess != null){
-					onSuccess(targetTaskId);
-				}
-			}
-			else {
-				self.checkToCancelUpdateInterval();
-				if (onError != null) {
-					onError(targetTaskId);
-				}
-			}
-		};
-		
-		self.checkToCancelUpdateInterval = function() {
+ 		self.checkToCancelUpdateInterval = function() {
 			for (var key in self.activeTaskInstances) {
 				if (self.activeTaskInstances.hasOwnProperty(key)) {
-					self.cancelTaskUpdateInterval();
+					return;
 				}
 			}
+			self.cancelTaskUpdateInterval();
 		};
 		
 		self.checkAllTasksProgress = function(){
@@ -128,14 +134,14 @@ angular.module('App.Services', [])
 
 
 				if (checkedTaskInstance.finishTime <= currentTime) {
-					self.completeTask(null, null, targetTaskId);
+					completeTask(targetTaskId);
 				}
 				else {
 					//check for partial accomplishments?
 					
 				}
 
-				checkedTaskInstance.currentProgressPercent = self.getPercentComplete(checkedTaskInstance.startTime, checkedTaskInstance.durationMillis, currentTime);
+				checkedTaskInstance.currentProgressPercent = getPercentComplete(checkedTaskInstance.startTime, checkedTaskInstance.durationMillis, currentTime);
 
 				if (onSuccess != null){
 					onSuccess(targetTaskId);
@@ -148,20 +154,25 @@ angular.module('App.Services', [])
 			}
 		};
 		
-		self.completeTask = function(onSuccess, onError, targetTaskId){
-			if (self.activeTaskInstances.hasOwnProperty(targetTaskId)){
-//				gameStateManager.taskInstanceCompleted(self.activeTaskInstances[targetTaskId]);
-				console.log("Task completed!");
-			}
-		};
-
-		self.getPercentComplete = function(startTime, durationInMillis, currentTime) {
+		getPercentComplete = function(startTime, durationInMillis, currentTime) {
 			var elapsedTimeInMillis = currentTime - startTime;
 			var elapsedTimeFraction = elapsedTimeInMillis / durationInMillis;
 			var elapsedTimePercentage = elapsedTimeFraction * 100;
 			return Math.round(elapsedTimePercentage);
-		}
-		
+		};
+
+		completeTask = function(targetTaskId){
+			var completedTaskInstance = self.activeTaskInstances[targetTaskId];
+			if (completedTaskInstance.completionDelegate != null) {
+				completedTaskInstance.completionDelegate();
+				self.removeTaskInstanceById(targetTaskId);
+			}
+			else {
+				self.removeTaskInstanceById(targetTaskId);
+			}
+			console.log("Task completed!");				
+
+		};
 		
 		return self;
 	}]);
