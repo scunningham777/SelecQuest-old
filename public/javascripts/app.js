@@ -33,12 +33,12 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
      				}]
      			},
      			controller : 'TaskSelectCtrl',
-     			templateUrl : 'partial/taskSelect.html'
+     			templateUrl : 'partials/taskSelect.html'
      		})
     }])
 
     .run(['gameStateManager', function(gameStateManager) {
 
-    	var task = {'name':"Test Task", 'durationMillis':10000, 'id':'123'};
+    	var task = {'name':"Free the dullard from the torture chamber.", 'durationMillis':5000, 'id':'123'};
     	gameStateManager.newTaskSelected(task);
     }]);

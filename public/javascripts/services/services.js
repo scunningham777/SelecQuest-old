@@ -20,15 +20,17 @@ angular.module('App.Services', [])
 		
 		self.taskInstanceCompleted = function(completedTaskInstance) {
 			//pass completedTaskInstance and generateTaskResultsSuccess to taskResultGenerator service
-			saveTaskResultsSuccess(null);
+			generateTaskResultsSuccess(null);
 			
 			function generateTaskResultsSuccess(taskResults){
 				//pass taskResults and saveTaskResultsSuccess to characterManager service
-				console.log("task results generated!");
+				console.log("task results generated for task " + completedTaskInstance.name + "!");
+				saveTaskResultsSuccess(taskResults);
 			};
 			
 			function saveTaskResultsSuccess(taskResults) {
-//					taskManager.removeTaskInstanceById(completedTaskInstance.id, null, null);			
+//					taskManager.removeTaskInstanceById(completedTaskInstance.id, null, null);
+				$state.go('taskSelect');		
 			};
 			
 		};
@@ -57,7 +59,7 @@ angular.module('App.Services', [])
 		return self;
 	})
 
-    .factory('taskManager', ['$interval', '$state', 'taskInstanceFactory', function($interval, $state, taskInstanceFactory) {
+    .factory('taskManager', ['$interval', '$state', function($interval, $state) {
         var self = {};
 		self.activeTaskInstances = {};
 		self.taskUpdateEnabled = false;
@@ -132,6 +134,8 @@ angular.module('App.Services', [])
 				var checkedTaskInstance = self.activeTaskInstances[targetTaskId];
 				var currentTime = new Date().getTime();
 
+				checkedTaskInstance.currentProgressPercent = getPercentComplete(checkedTaskInstance.startTime, checkedTaskInstance.durationMillis, currentTime);
+
 
 				if (checkedTaskInstance.finishTime <= currentTime) {
 					completeTask(targetTaskId);
@@ -140,8 +144,6 @@ angular.module('App.Services', [])
 					//check for partial accomplishments?
 					
 				}
-
-				checkedTaskInstance.currentProgressPercent = getPercentComplete(checkedTaskInstance.startTime, checkedTaskInstance.durationMillis, currentTime);
 
 				if (onSuccess != null){
 					onSuccess(targetTaskId);
@@ -154,17 +156,17 @@ angular.module('App.Services', [])
 			}
 		};
 		
-		getPercentComplete = function(startTime, durationInMillis, currentTime) {
+		function getPercentComplete(startTime, durationInMillis, currentTime) {
 			var elapsedTimeInMillis = currentTime - startTime;
 			var elapsedTimeFraction = elapsedTimeInMillis / durationInMillis;
 			var elapsedTimePercentage = elapsedTimeFraction * 100;
 			return Math.round(elapsedTimePercentage);
 		};
 
-		completeTask = function(targetTaskId){
+		function completeTask(targetTaskId){
 			var completedTaskInstance = self.activeTaskInstances[targetTaskId];
 			if (completedTaskInstance.completionDelegate != null) {
-				completedTaskInstance.completionDelegate();
+				completedTaskInstance.completionDelegate(completedTaskInstance);
 				self.removeTaskInstanceById(targetTaskId);
 			}
 			else {
