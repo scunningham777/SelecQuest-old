@@ -26,10 +26,12 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
 
      		.state("taskSelect", {
      			resolve: {
-     				availableTasks: ['$state', 'taskManager',
-     				function($state, taskManager) {
-//     					var availableTasks = taskManager.availableTasksList;
-						//deal with this later
+     				availableTasks: ['taskSelectManager',
+     				function(taskSelectManager) {
+     					var availableTasks = taskSelectManager.getAvailableTasksList();
+						//somehow make sure we're not in the middle of another task and somehow got to this state on accident?
+
+						return availableTasks;
      				}]
      			},
      			controller : 'TaskSelectCtrl',
@@ -37,8 +39,10 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
      		})
     }])
 
-    .run(['gameStateManager', function(gameStateManager) {
+    .run(['$state', 'gameStateManager', function($state, gameStateManager) {
 
-    	var task = {'name':"Free the dullard from the torture chamber.", 'durationMillis':5000, 'id':'123'};
-    	gameStateManager.newTaskSelected(task);
+//    	var task = {'name':"Free the dullard from the torture chamber.", 'durationMillis':5000, 'id':'123'};
+//    	gameStateManager.newTaskSelected(task);
+		$state.go('taskSelect');
+
     }]);

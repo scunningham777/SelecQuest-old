@@ -59,7 +59,7 @@ angular.module('App.Services', [])
 		return self;
 	})
 
-    .factory('taskManager', ['$interval', '$state', function($interval, $state) {
+    .factory('taskManager', ['$interval', function($interval) {
         var self = {};
 		self.activeTaskInstances = {};
 		self.taskUpdateEnabled = false;
@@ -177,4 +177,42 @@ angular.module('App.Services', [])
 		};
 		
 		return self;
-	}]);
+	}])
+
+	.factory('taskSelectManager', ['utils', function(utils) {
+		var self = {};
+		self.availableTasksList = {};
+
+		self.getAvailableTasksList = function() {
+			if (utils.isObjectEmpty(self.availableTasksList)) {
+				self.availableTasksList = self.generateNewTasksList();
+			}
+
+			return self.availableTasksList;
+		};
+
+		self.generateNewTasksList = function() {
+			var tasksList = {};
+			tasksList['111'] = {'name':"Free the dullard from the torture chamber.", 'durationMillis':5000, 'id':'111'};
+			tasksList['112'] = {'name':"Keep grandmother company.", 'durationMillis':10000, 'id':'112'};
+			tasksList['113'] = {'name':"Clear the rooftop of dire chickens.", 'durationMillis':7000, 'id':'113'};
+
+			return tasksList;
+		}
+
+		return self;
+	}])
+
+	.factory('utils', function() {
+		var self = {};
+
+		self.isObjectEmpty = function(obj){
+		    for(var prop in obj) {
+			    if(obj.hasOwnProperty(prop))
+				    return false;
+				}
+   			return true;
+		};
+
+		return self;
+	});
