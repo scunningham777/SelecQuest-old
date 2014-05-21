@@ -13,6 +13,14 @@ describe('Crawler Quest Services', function() {
 		expect(taskManager).not.to.equal(null);
 	}));
 	
+	it('should contain a taskSelectManager service', inject(function(taskSelectManager) {
+		expect(taskSelectManager).not.to.equal(null);
+	}));
+
+	it('should contain a utils service', inject(function(utils) {
+		expect(utils).not.to.equal(null);
+	}));
+
 	describe('taskInstanceFactory service', function(){
 		
 		it('should generate a new task instance', inject(function(taskInstanceFactory) {
