@@ -8,7 +8,12 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
 
         $stateProvider
 
-        	.state("activeTask", {
+        	.state("crawler", {
+        		abstract:true,
+        		templateUrl: 'partials/phoneMain.html'
+        	})
+
+        	.state("crawler.activeTask", {
         		params: ['selectedActiveTaskInstance'],
         		resolve: {
         			selectedActiveTaskInstance: ['$state', '$stateParams', 'taskManager', 
@@ -24,7 +29,7 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
             	templateUrl : 'partials/taskProgress.html'
      		})
 
-     		.state("taskSelect", {
+     		.state("crawler.taskSelect", {
      			resolve: {
      				availableTasks: ['taskSelectManager',
      				function(taskSelectManager) {
@@ -37,12 +42,15 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
      			controller : 'TaskSelectCtrl',
      			templateUrl : 'partials/taskSelect.html'
      		})
+
+    /* 		.state("history", {
+     			.resolve
+     		})
+*/
     }])
 
     .run(['$state', 'gameStateManager', function($state, gameStateManager) {
 
-//    	var task = {'name':"Free the dullard from the torture chamber.", 'durationMillis':5000, 'id':'123'};
-//    	gameStateManager.newTaskSelected(task);
-		$state.go('taskSelect');
+//		$state.go('crawler.taskSelect');
 
     }]);

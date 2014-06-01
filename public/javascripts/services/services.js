@@ -3,7 +3,7 @@
  */
 angular.module('App.Services', [])
 
-	.factory('gameStateManager', ['taskManager', 'taskInstanceFactory', '$state',  function(taskManager, taskInstanceFactory, $state) {
+	.factory('gameStateManager', ['taskManager', 'taskInstanceFactory', '$state', function(taskManager, taskInstanceFactory, $state) {
 		var self = {};
 
 		self.newTaskSelected = function(selectedTask) {
@@ -38,28 +38,7 @@ angular.module('App.Services', [])
 		return self;
 	}])
 	
-	.factory('taskInstanceFactory', function(){
-		var self = {};
-		
-		self.generateNewTaskInstance = function(newTask, startTime, completionDelegate) {
-			var finishTime = new Date(startTime + (newTask.durationMillis));
-			var newTaskInstance = {
-				'id':newTask.id, 
-				'name':newTask.name, 
-				'durationMillis':newTask.durationMillis, 
-				'startTime':startTime, 
-				'finishTime': finishTime.getTime(), 
-				'currentProgressPercent':0, 
-				'completionDelegate':completionDelegate
-			};
-			
-			return newTaskInstance;
-		}
-		
-		return self;
-	})
-
-    .factory('taskManager', ['$interval', function($interval) {
+   .factory('taskManager', ['$interval', function($interval) {
         var self = {};
 		self.activeTaskInstances = {};
 		self.taskUpdateEnabled = false;
@@ -80,7 +59,9 @@ angular.module('App.Services', [])
 			
 			self.startTaskUpdateInterval();
 		
-            onSuccess(newTaskInstance);
+            if (onSuccess != null) {
+            	onSuccess(newTaskInstance);
+            }
         };
 		
 		self.removeTaskInstanceById = function(targetTaskId, onSuccess, onError)  {
@@ -203,6 +184,53 @@ angular.module('App.Services', [])
 		return self;
 	}])
 
+	.factory('taskInstanceFactory', function(){
+		var self = {};
+		
+		self.generateNewTaskInstance = function(newTask, startTime, completionDelegate) {
+			var finishTime = new Date(startTime + (newTask.durationMillis));
+			var newTaskInstance = {
+				'id':newTask.id, 
+				'name':newTask.name, 
+				'durationMillis':newTask.durationMillis, 
+				'startTime':startTime, 
+				'finishTime': finishTime.getTime(), 
+				'currentProgressPercent':0, 
+				'completionDelegate':completionDelegate
+			};
+			
+			return newTaskInstance;
+		}
+		
+		return self;
+	})
+
+ 	.factory('taskResultGenerator', ['utils', function(utils) {
+		var self = {};
+
+		self.generateTaskResults = function(completedTaskInstance, wasCompletionSuccessful, onSuccess, onError) {
+			var taskResults = {
+				'id' : completedTaskInstance.id,
+				'name' : completedTaskInstance.name,
+				'durationMillis' : completedTaskInstance.durationMillis,
+				'finishTime' : completedTaskInstance.finishTime,
+				'hasCompletionAnimationPlayed' : false,
+				'experience' : 10,
+				'gold' : 15,
+				'gossip' : 25,
+				'items' : ['A Golden Toothpick'],
+				'skills' : ['Turtle Breath']
+			};
+
+
+			if (onSuccess != null) {
+				onSuccess(taskResults);
+			}
+		};
+
+		return self;
+	}])
+
 	.factory('utils', function() {
 		var self = {};
 
@@ -213,6 +241,21 @@ angular.module('App.Services', [])
 				}
    			return true;
 		};
+
+		return self;
+	})
+
+
+	.factory('entityValidator', function() {
+		var self = {};
+
+		self.isValidTask = function(testee){
+			return true;
+		}
+
+		self.isValidTaskInstance = function(testee){
+			return true;
+		}
 
 		return self;
 	});

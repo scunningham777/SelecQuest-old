@@ -55,26 +55,36 @@ describe('Crawler Quest Services', function() {
 //			debugger
 			expect(taskManagerSvc.activeTaskInstances).to.include.keys('1234');
 			expect(returnedTaskInstance.startTime).to.be.lessThan(new Date().getTime());
-			
-			taskManagerSvc.removeTaskInstanceById(null, null, '1234');
+
+			taskManagerSvc.removeTaskInstanceById('1234', null, null);
 			expect(taskManagerSvc.activeTaskInstances).not.to.include.keys('1234');
 		});
-		
-		it('should start and automatically complete a task instance', function() {
+
+		it('should automatically update a task instance', function() {
+
 //			debugger
 			expect(taskManagerSvc.taskUpdateInterval).to.be.null;
 		
-			var taskCompleteDelegate = function(onSuccess) {onSuccess();};
+			var taskCompleteDelegate = function(onSuccess) {
+
+			};
 			var taskCompleteSpy = chai.spy(taskCompleteDelegate);
-			var newTaskInstance = {'name':"testTask", 'durationMillis':500, 'id':'135', 'completionDelegate':taskCompleteDelegate};
+			var taskStartTime = new Date().getTime();
+			var taskFinishTime = taskStartTime + 500;
+			var newTaskInstance = {'name':"testTask", 'durationMillis':500, 'id':'135', 'completionDelegate':taskCompleteSpy, 'startTime':taskStartTime, 'finishTime':taskFinishTime};
 			var returnedTaskInstance;
 			var startSuccess = function(taskInstance) {returnedTaskInstance = taskInstance};
 			taskManagerSvc.startNewTaskInstance(newTaskInstance, startSuccess, null);
 			expect(taskManagerSvc.taskUpdateInterval).not.to.be.null;
 			
 			//actually test that the task has updated 
-			interval.flush(600);
-			expect(taskCompleteSpy).to.have.been.called();
+			var taskUpdateSpy = chai.spy(taskManagerSvc.checkTaskProgressById);
+			interval.flush(650);
+			taskManagerSvc.checkTaskProgressById = taskUpdateSpy;
+			interval.flush(150);
+
+			expect(taskUpdateSpy).to.have.been.called();
+//			expect(taskCompleteSpy).to.have.been.called();
 		});
 	});
 });
