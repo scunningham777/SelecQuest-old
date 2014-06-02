@@ -3,7 +3,7 @@
  */
 angular.module('App.Services', [])
 
-	.factory('gameStateManager', ['taskManager', 'taskInstanceFactory', '$state', function(taskManager, taskInstanceFactory, $state) {
+	.factory('gameStateManager', ['taskManager', 'taskInstanceFactory', 'taskResultGenerator', '$state', function(taskManager, taskInstanceFactory, taskResultGenerator, $state) {
 		var self = {};
 
 		self.newTaskSelected = function(selectedTask) {
@@ -20,7 +20,7 @@ angular.module('App.Services', [])
 		
 		self.taskInstanceCompleted = function(completedTaskInstance) {
 			//pass completedTaskInstance and generateTaskResultsSuccess to taskResultGenerator service
-			generateTaskResultsSuccess(null);
+			taskResultGenerator.generateTaskResults(completedTaskInstance, true, generateTaskResultsSuccess, null);
 			
 			function generateTaskResultsSuccess(taskResults){
 				//pass taskResults and saveTaskResultsSuccess to characterManager service

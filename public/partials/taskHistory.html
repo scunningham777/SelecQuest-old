@@ -1,0 +1,10 @@
+<h3>Task History</h3>
+<ul class="list-group">
+	<li class="list-group-item" ng-repeat="taskResult in playerTaskResults">
+		<h4>{{taskResult.name}}</h4>
+		<span class="label label-success">XP: {{taskResult.experience}}</span>
+		<span class="label label-warning">Gold: {{taskResult.gold}}</span>
+		<span class="label label-info">Gossip Points: {{taskResult.gossip}}</span>
+		<br/>
+	</li>
+</ul>

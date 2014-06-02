@@ -10,4 +10,8 @@ angular.module('App.Controllers', ['App.Services'])
     	$scope.taskSelected = function(selectedTaskId) {
     		gameStateManager.newTaskSelected($scope.availableTasksList[selectedTaskId]);
     	}
+    }])
+
+    .controller('taskHistory', ['$scope', 'playerTaskResults', function($scope, playerTaskResults){
+    	$scope.playerTaskResults = playerTaskResults;
     }]);
