@@ -3,7 +3,7 @@
  */
 angular.module('App.Services', [])
 
-	.factory('gameStateManager', ['taskManager', 'taskInstanceFactory', 'taskResultGenerator', '$state', function(taskManager, taskInstanceFactory, taskResultGenerator, $state) {
+	.factory('gameStateManager', ['taskManager', 'taskInstanceFactory', 'taskResultGenerator', 'playerManager', '$state', function(taskManager, taskInstanceFactory, taskResultGenerator, playerManager, $state) {
 		var self = {};
 
 		self.newTaskSelected = function(selectedTask) {
@@ -14,7 +14,7 @@ angular.module('App.Services', [])
 			function startNewTaskSuccess(startedTaskInstance) {
 				//taskManager.clearAvailableTasksList();
 				//navigate to TaskProgressView
-				$state.go('activeTask', {'selectedActiveTaskInstance': startedTaskInstance.id}, {location:false});
+				$state.go('crawler.activeTask', {'selectedActiveTaskInstance': startedTaskInstance.id}, {location:false});
 			};
 		};
 		
@@ -25,12 +25,12 @@ angular.module('App.Services', [])
 			function generateTaskResultsSuccess(taskResults){
 				//pass taskResults and saveTaskResultsSuccess to characterManager service
 				console.log("task results generated for task " + completedTaskInstance.name + "!");
-				saveTaskResultsSuccess(taskResults);
+				playerManager.addTaskResultToPlayerHistory(taskResults, saveTaskResultsSuccess, null);
 			};
 			
 			function saveTaskResultsSuccess(taskResults) {
 //					taskManager.removeTaskInstanceById(completedTaskInstance.id, null, null);
-				$state.go('taskSelect');		
+				$state.go('history');		
 			};
 			
 		};
@@ -184,6 +184,32 @@ angular.module('App.Services', [])
 		return self;
 	}])
 
+	.factory('playerManager', ['entityValidator', function(entityValidator) {
+		var self = {};
+
+		var currentPlayerTaskHistory = [];
+
+		self.getCurrentPlayerTaskHistory = function() {
+			return currentPlayerTaskHistory;
+		}
+
+		self.addTaskResultToPlayerHistory = function(newTaskResult, onSuccess, onError) {
+			if ( ! entityValidator.isValidTaskResult(newTaskResult)) {
+				if(onError != null) {
+					onError("Invalid Task Result object!");
+				}
+			}
+
+			currentPlayerTaskHistory.push(newTaskResult);
+
+			if (onSuccess != null) {
+				onSuccess(newTaskResult);
+			}
+		}
+
+		return self;
+	}])
+
 	.factory('taskInstanceFactory', function(){
 		var self = {};
 		
@@ -251,11 +277,15 @@ angular.module('App.Services', [])
 
 		self.isValidTask = function(testee){
 			return true;
-		}
+		};
 
 		self.isValidTaskInstance = function(testee){
 			return true;
-		}
+		};
+
+		self.isValidTaskResult = function(testee){
+			return true;
+		};
 
 		return self;
 	});

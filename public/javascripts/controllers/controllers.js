@@ -12,6 +12,6 @@ angular.module('App.Controllers', ['App.Services'])
     	}
     }])
 
-    .controller('taskHistory', ['$scope', 'playerTaskResults', function($scope, playerTaskResults){
+    .controller('taskHistoryCtrl', ['$scope', 'playerTaskResults', function($scope, playerTaskResults){
     	$scope.playerTaskResults = playerTaskResults;
     }]);

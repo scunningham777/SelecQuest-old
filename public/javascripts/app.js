@@ -43,14 +43,23 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
      			templateUrl : 'partials/taskSelect.html'
      		})
 
-    /* 		.state("history", {
-     			.resolve
+     		.state("history", {
+     			resolve: {
+     				playerTaskResults: ['playerManager', 
+     				function(playerManager) {
+     					var playerTaskHistory = playerManager.getCurrentPlayerTaskHistory();
+     					return playerTaskHistory;
+     				}]
+     			},
+     			controller : 'taskHistoryCtrl',
+     			templateUrl : 'partials/taskHistory.html'
      		})
-*/
+
     }])
 
-    .run(['$state', 'gameStateManager', function($state, gameStateManager) {
+    .run(['$state', function($state) {
 
-//		$state.go('crawler.taskSelect');
+		$state.go('crawler.taskSelect');
+//		$state.go('history');
 
     }]);
