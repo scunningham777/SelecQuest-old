@@ -38,11 +38,18 @@ angular.module('App.Services', [])
 		return self;
 	}])
 	
-   .factory('taskManager', ['$interval', function($interval) {
+   .factory('taskManager', ['$interval', 'utils', function($interval, utils) {
         var self = {};
 		self.activeTaskInstances = {};
 		self.taskUpdateEnabled = false;
 		self.taskUpdateInterval = null;
+
+		self.hasActiveTask = function() {
+			if (utils.isObjectEmpty(self.activeTaskInstances)) {
+				return false;
+			}
+			return true;
+		}
 		
 		self.getActiveTaskInstanceById = function(requestedId) {
 			if (requestedId == null) {return null};
@@ -96,12 +103,9 @@ angular.module('App.Services', [])
 		};
 		
  		self.checkToCancelUpdateInterval = function() {
-			for (var key in self.activeTaskInstances) {
-				if (self.activeTaskInstances.hasOwnProperty(key)) {
-					return;
-				}
+			if (utils.isObjectEmpty(self.activeTaskInstances)) {
+				self.cancelTaskUpdateInterval();
 			}
-			self.cancelTaskUpdateInterval();
 		};
 		
 		self.checkAllTasksProgress = function(){

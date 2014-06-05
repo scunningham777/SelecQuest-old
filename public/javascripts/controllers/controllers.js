@@ -9,9 +9,13 @@ angular.module('App.Controllers', ['App.Services'])
 
     	$scope.taskSelected = function(selectedTaskId) {
     		gameStateManager.newTaskSelected($scope.availableTasksList[selectedTaskId]);
-    	}
+    	};
     }])
 
-    .controller('taskHistoryCtrl', ['$scope', 'playerTaskResults', function($scope, playerTaskResults){
+    .controller('taskHistoryCtrl', ['$scope', '$state', 'playerTaskResults', function($scope, $state, playerTaskResults){
     	$scope.playerTaskResults = playerTaskResults;
+
+    	$scope.goBack = function() {
+    		$state.go('crawler');
+    	};
     }]);

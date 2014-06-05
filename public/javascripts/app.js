@@ -9,8 +9,16 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
         $stateProvider
 
         	.state("crawler", {
-        		abstract:true,
-        		templateUrl: 'partials/phoneMain.html'
+ //       		abstract:true,
+        		templateUrl: 'partials/phoneMain.html',
+        		controller: ['$state', 'taskManager', function($state, taskManager){
+        			if (taskManager.hasActiveTask()) {
+        				$state.go('crawler.activeTask');
+        			}
+        			else {
+        				$state.go('crawler.taskSelect');
+        			}
+        		}]
         	})
 
         	.state("crawler.activeTask", {
@@ -19,10 +27,7 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
         			selectedActiveTaskInstance: ['$state', '$stateParams', 'taskManager', 
         			function($state, $stateParams, taskManager) {
         				var selectedTask = taskManager.getActiveTaskInstanceById($stateParams.selectedActiveTaskInstance);
-        				if (selectedTask == null) {
-        					$state.go("taskSelect", {}, {location:false});
-        				}
-        				return selectedTask;
+	       				return selectedTask;
         			}]
         		},
             	controller : 'TaskProgressCtrl',
@@ -59,7 +64,7 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
 
     .run(['$state', function($state) {
 
-		$state.go('crawler.taskSelect');
+		$state.go('crawler');
 //		$state.go('history');
 
     }]);
