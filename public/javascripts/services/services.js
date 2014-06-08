@@ -12,7 +12,6 @@ angular.module('App.Services', [])
 			taskManager.startNewTaskInstance(newTaskInstance, startNewTaskSuccess, null);
 			
 			function startNewTaskSuccess(startedTaskInstance) {
-				//taskManager.clearAvailableTasksList();
 				//navigate to TaskProgressView
 				$state.go('crawler.activeTask', {'selectedActiveTaskInstance': startedTaskInstance.id}, {location:false});
 			};
