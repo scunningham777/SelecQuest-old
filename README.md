@@ -1,1 +1,3 @@
-"# This is my README" 
+SelecQuest
+
+A timer-based roguelike inspired by ProgressQuest. 
