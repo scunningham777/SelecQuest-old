@@ -2,7 +2,7 @@
 
 <h3>Task History</h3>
 <ul class="list-group">
-	<li ng-repeat="taskResult in playerTaskResults" class="list-group-item">
+	<li ng-repeat="taskResult in playerTaskResults | orderBy:'finishTime':true" class="list-group-item">
 		<h4>{{taskResult.name}}</h4>
 		<span class="label label-success">XP: {{taskResult.experience}}</span>
 		<span class="label label-warning">Gold: {{taskResult.gold}}</span>
