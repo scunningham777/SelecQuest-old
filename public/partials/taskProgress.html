@@ -4,9 +4,10 @@
 
 <div ng-show="currentTaskInstance != null">
 	<h3>{{currentTaskInstance.name}}<h3>
-	<div class="progress progress-striped active">
+	<div class="progress progress-striped active" ng-class="{completedTask: completed == true}">
 		<div class="progress-bar" role="progressbar" aria-valuenow={{currentTaskInstance.currentProgressPercent}} aria-valuemin="0" aria-valuemax="100" style="width: {{currentTaskInstance.currentProgressPercent}}%">
 			<span class="sr-only">{{currentTaskInstance.currentProgressPercent}}% Complete!</span>
 		</div>
 	</div>
+<!--	<h4 style="color:red" ng-show="completed == true">Task Complete!</h4>	-->
 </div>	

@@ -6,3 +6,18 @@ body {
 a {
   color: #00B7FF;
 }
+
+.completedTask{
+	-webkit-animation: expand-shadow .6s ease-out .5s;
+//	-moz-box-shadow: 0 0 6px 6px #5bc0de, 0 0 2px 2px #fff;
+//	-webkit-box-shadow: 0 0 6px 6px #5bc0de, 0 0 2px 2px #fff;
+//	-o-box-shadow: 0 0 6px 6px #5bc0de, 0 0 2px 2px #fff;
+//	box-shadow: 0 0 6px 6px #5bc0de, 0 0 2px 2px #fff;
+}
+
+@-webkit-keyframes expand-shadow {
+	0%	{-webkit-box-shadow:0 0 0 0 #5bc0de;}
+	33% {-webkit-box-shadow:0 0 8px 8px #5bc0de;}
+	66% {-webkit-box-shadow:0 0 16px 8px #5bc0de;}
+	100% {-webkit-box-shadow:0 0 16px 1px #5bc0de;}
+}

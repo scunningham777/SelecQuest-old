@@ -3,7 +3,7 @@
  */
 angular.module('App.Services', [])
 
-	.factory('gameStateManager', ['taskManager', 'taskInstanceFactory', 'taskResultGenerator', 'playerManager', '$state', function(taskManager, taskInstanceFactory, taskResultGenerator, playerManager, $state) {
+	.factory('gameStateManager', ['$state', '$rootScope', '$timeout', 'taskManager', 'taskInstanceFactory', 'taskResultGenerator', 'playerManager', function($state, $rootScope, $timeout, taskManager, taskInstanceFactory, taskResultGenerator, playerManager) {
 		var self = {};
 
 		self.newTaskSelected = function(selectedTask) {
@@ -29,15 +29,19 @@ angular.module('App.Services', [])
 			
 			function saveTaskResultsSuccess(taskResults) {
 //					taskManager.removeTaskInstanceById(completedTaskInstance.id, null, null);
-				$state.go('history');		
+				$timeout(function() {$state.go('history')}, 1000);		
 			};
 			
 		};
 
+		$rootScope.$on('taskCompleted', function(event, args) {
+				if (args.completionDelegate != null) {args.completionDelegate(args.completedTaskInstance)};
+			});
+
 		return self;
 	}])
 	
-   .factory('taskManager', ['$interval', 'utils', function($interval, utils) {
+   .factory('taskManager', ['$interval', '$rootScope', 'utils', function($interval, $rootScope, utils) {
         var self = {};
 		self.activeTaskInstances = {};
 		self.taskUpdateEnabled = false;
@@ -89,7 +93,7 @@ angular.module('App.Services', [])
 		self.startTaskUpdateInterval = function() {
 			self.taskUpdateEnabled = true;
 			if (!self.taskUpdateInterval) {
-				self.taskUpdateInterval = $interval(self.checkAllTasksProgress, 100);
+				self.taskUpdateInterval = $interval(self.checkAllTasksProgress, 500);
 			}
 		};
 		
@@ -116,13 +120,14 @@ angular.module('App.Services', [])
 		self.checkTaskProgressById = function(targetTaskId, onSuccess, onError){
 			if (self.activeTaskInstances.hasOwnProperty(targetTaskId)) {
 				var checkedTaskInstance = self.activeTaskInstances[targetTaskId];
+				if (checkedTaskInstance.completed == true) {
+					completeTask(targetTaskId);
+				}
+
 				var currentTime = new Date().getTime();
 
-				checkedTaskInstance.currentProgressPercent = getPercentComplete(checkedTaskInstance.startTime, checkedTaskInstance.durationMillis, currentTime);
-
-
-				if (checkedTaskInstance.finishTime <= currentTime) {
-					completeTask(targetTaskId);
+				if (checkedTaskInstance.finishTime < currentTime) {
+					checkedTaskInstance.completed = true;
 				}
 				else {
 					//check for partial accomplishments?
@@ -140,17 +145,11 @@ angular.module('App.Services', [])
 			}
 		};
 		
-		function getPercentComplete(startTime, durationInMillis, currentTime) {
-			var elapsedTimeInMillis = currentTime - startTime;
-			var elapsedTimeFraction = elapsedTimeInMillis / durationInMillis;
-			var elapsedTimePercentage = elapsedTimeFraction * 100;
-			return Math.round(elapsedTimePercentage);
-		};
-
 		function completeTask(targetTaskId){
 			var completedTaskInstance = self.activeTaskInstances[targetTaskId];
 			if (completedTaskInstance.completionDelegate != null) {
-				completedTaskInstance.completionDelegate(completedTaskInstance);
+//				completedTaskInstance.completionDelegate(completedTaskInstance);
+				$rootScope.$broadcast("taskCompleted", {'completedTaskInstance':completedTaskInstance, 'completionDelegate':completedTaskInstance.completionDelegate });
 				self.removeTaskInstanceById(targetTaskId);
 			}
 			else {
@@ -178,7 +177,7 @@ angular.module('App.Services', [])
 		self.generateNewTasksList = function() {
 			var tasksList = {};
 			tasksList['111'] = {'name':"Free the dullard from the torture chamber.", 'durationMillis':5000, 'id':'111'};
-			tasksList['112'] = {'name':"Keep grandmother company.", 'durationMillis':10000, 'id':'112'};
+			tasksList['112'] = {'name':"Keep grandmother company.", 'durationMillis':20000, 'id':'112'};
 			tasksList['113'] = {'name':"Clear the rooftop of dire chickens.", 'durationMillis':7000, 'id':'113'};
 
 			return tasksList;
