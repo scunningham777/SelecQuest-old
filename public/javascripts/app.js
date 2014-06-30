@@ -1,4 +1,4 @@
-angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services'])
+angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services', 'ui.bootstrap'])
 
 
 
@@ -11,13 +11,16 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
         	.state("crawler", {
  //       		abstract:true,
         		templateUrl: 'partials/phoneMain.html',
-        		controller: ['$state', 'taskManager', function($state, taskManager){
+        		controller: ['$scope', '$state', 'taskManager', 'characterManager', function($scope, $state, taskManager, characterManager){
+        			$scope.currentCharacter = characterManager.getCurrentCharacterDetails();
+        			$scope.characterDetailsExpanded = false;
         			if (taskManager.hasActiveTask()) {
         				$state.go('crawler.activeTask');
         			}
         			else {
         				$state.go('crawler.taskSelect');
         			}
+
         		}]
         	})
 
@@ -50,10 +53,10 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
 
      		.state("history", {
      			resolve: {
-     				playerTaskResults: ['playerManager', 
-     				function(playerManager) {
-     					var playerTaskHistory = playerManager.getCurrentPlayerTaskHistory();
-     					return playerTaskHistory;
+     				characterTaskResults: ['characterManager', 
+     				function(characterManager) {
+     					var characterTaskHistory = characterManager.getCurrentCharacterTaskHistory();
+     					return characterTaskHistory;
      				}]
      			},
      			controller : 'taskHistoryCtrl',

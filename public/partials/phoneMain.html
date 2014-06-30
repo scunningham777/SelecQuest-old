@@ -1,1 +1,59 @@
-<div ui-view></div>
+<div class="characterDetailsContainer container-fluid" ng-click="characterDetailsExpanded = !characterDetailsExpanded">
+	<div class="alwaysVisibleDetails">
+		<div class="row">
+			<div class="col-xs-1 characterDetailName">Name:</div>
+			<div class="col-xs-11 col-sm-10 characterDetail">
+				<span style="font-weight:bold; font-size:16px;">{{currentCharacter.name}}</span>
+				<span ng-repeat="epithet in currentCharacter.epithets" style="font-style:italic;">{{$index==0?"  ":","}} "{{epithet}}"</span>
+			</div>
+		</div>		
+		<div collapse="!characterDetailsExpanded" class="row">
+			<div class="col-xs-1 characterDetailName">Lineage:</div>
+			<div class="col-xs-11 col-sm-10 characterDetail">
+				<span ng-repeat="ancestor in currentCharacter.pedigree">{{$index==0?"  ":","}} {{ancestor}}</span>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-4">
+				<div class="row">
+					<div class="characterDetailName col-xs-8 col-sm-3">Class:</div>
+					<div class="characterDetail col-xs-9 col-sm-7">{{currentCharacter.class}}</div>
+				</div>
+			</div>
+			<div class="col-xs-4">
+				<div class="row">
+					<div class="characterDetailName col-xs-8 col-sm-3">Race:</div>
+					<div class="characterDetail col-xs-9 col-sm-7">{{currentCharacter.race}}</div>
+				</div>
+			</div>
+			<div class="col-xs-4">
+				<div class="row">
+					<div class="characterDetailName col-xs-8 col-sm-3">Level:</div>
+					<div class="characterDetail col-xs-9 col-sm-7">{{currentCharacter.level}}</div>
+				</div>
+			</div>
+		</div>
+		<div collapse="!characterDetailsExpanded" class="row">
+			<div class="col-xs-4">
+				<div class="row">
+					<div class="characterDetailName col-xs-8 col-sm-3">XP:</div>
+					<div class="characterDetail col-xs-9 col-sm-7">{{currentCharacter.xp}}</div>
+				</div>
+			</div>
+			<div class="col-xs-4">
+				<div class="row">
+					<div class="characterDetailName col-xs-8 col-sm-3">Gold:</div>
+					<div class="characterDetail col-xs-9 col-sm-7">{{currentCharacter.gold}}</div>
+				</div>
+			</div>
+			<div class="col-xs-4">
+				<div class="row">
+					<div class="characterDetailName col-xs-8 col-sm-3">Gossip:</div>
+					<div class="characterDetail col-xs-9 col-sm-7">{{currentCharacter.gossip}}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div ui-view style="padding-top:15px;" class="container-fluid"></div>

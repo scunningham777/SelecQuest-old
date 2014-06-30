@@ -40,8 +40,8 @@ angular.module('App.Controllers', ['App.Services'])
     	};
     }])
 
-    .controller('taskHistoryCtrl', ['$scope', '$state', 'playerTaskResults', function($scope, $state, playerTaskResults){
-    	$scope.playerTaskResults = playerTaskResults;
+    .controller('taskHistoryCtrl', ['$scope', '$state', 'characterTaskResults', function($scope, $state, characterTaskResults){
+    	$scope.characterTaskResults = characterTaskResults;
 
     	$scope.goBack = function() {
     		$state.go('crawler');

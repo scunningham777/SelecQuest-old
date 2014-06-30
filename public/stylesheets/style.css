@@ -1,10 +1,42 @@
-body {
-  padding: 50px;
+body{
+//  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+//  background-color: #000;
 }
 
 a {
   color: #00B7FF;
+}
+
+.characterDetailsContainer{
+	background-color: #7FFAB2;
+	padding: 20px;
+}
+
+.characterDetailName{
+	font-family: "Courier New", Courier, monospace;
+	color: gray;
+	vertical-align: bottom;
+}
+
+.characterDetail{
+//	width: 100%;
+	margin-left:15px;
+	padding: 0 5px;
+	border-bottom: 1px solid black;
+}
+
+.crawler-panel .panel-heading{
+//	background-color: #83ACFF !important;
+}
+
+.crawler-panel .list-group-item{
+//	background-color: #F0EF9F;
+}
+
+.explanatory{
+	font-style: italic;
+	color:gray;
 }
 
 .completedTask{

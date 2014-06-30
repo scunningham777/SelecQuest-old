@@ -3,7 +3,7 @@
  */
 angular.module('App.Services', [])
 
-	.factory('gameStateManager', ['$state', '$rootScope', '$timeout', 'taskManager', 'taskInstanceFactory', 'taskResultGenerator', 'playerManager', function($state, $rootScope, $timeout, taskManager, taskInstanceFactory, taskResultGenerator, playerManager) {
+	.factory('gameStateManager', ['$state', '$rootScope', '$timeout', 'taskManager', 'taskInstanceFactory', 'taskResultGenerator', 'characterManager', function($state, $rootScope, $timeout, taskManager, taskInstanceFactory, taskResultGenerator, characterManager) {
 		var self = {};
 
 		self.newTaskSelected = function(selectedTask) {
@@ -24,7 +24,7 @@ angular.module('App.Services', [])
 			function generateTaskResultsSuccess(taskResults){
 				//pass taskResults and saveTaskResultsSuccess to characterManager service
 				console.log("task results generated for task " + completedTaskInstance.name + "!");
-				playerManager.addTaskResultToPlayerHistory(taskResults, saveTaskResultsSuccess, null);
+				characterManager.addTaskResultToCharacterHistory(taskResults, saveTaskResultsSuccess, null);
 			};
 			
 			function saveTaskResultsSuccess(taskResults) {
@@ -186,28 +186,64 @@ angular.module('App.Services', [])
 		return self;
 	}])
 
-	.factory('playerManager', ['entityValidator', function(entityValidator) {
+	.factory('characterManager', ['entityValidator', function(entityValidator) {
 		var self = {};
 
-		var currentPlayerTaskHistory = [];
+		var currentCharacter; 		//don't lazy load!
 
-		self.getCurrentPlayerTaskHistory = function() {
-			return currentPlayerTaskHistory;
+		self.getCurrentCharacterTaskHistory = function() {
+			return currentCharacter.taskHistory;
 		}
 
-		self.addTaskResultToPlayerHistory = function(newTaskResult, onSuccess, onError) {
+		self.getCurrentCharacterDetails = function() {
+			return currentCharacter;
+		}
+
+		self.addTaskResultToCharacterHistory = function(newTaskResult, onSuccess, onError) {
 			if ( ! entityValidator.isValidTaskResult(newTaskResult)) {
 				if(onError != null) {
 					onError("Invalid Task Result object!");
 				}
 			}
 
-			currentPlayerTaskHistory.push(newTaskResult);
+			currentCharacter.xp += newTaskResult.xp;
+			currentCharacter.gold += newTaskResult.gold;
+			currentCharacter.gossip += newTaskResult.gossip;
+
+			currentCharacter.taskHistory.push(newTaskResult);
 
 			if (onSuccess != null) {
 				onSuccess(newTaskResult);
 			}
 		}
+
+		//load the character
+		function onLoadCharacterSuccess(loadedCharacter) {
+			currentCharacter = loadedCharacter;
+		}
+
+		function onLoadCharacterError(errorMessage) {
+			console.log(errorMessage);
+		}
+
+		function loadCharacter() {
+			var character = {};
+
+			character.name = "Tomas";
+			character.epithets = ["The Turk", "Big Nemesis"];
+			character.pedigree = ["Son of Grenph", "Daughter of Milgrock", "Foster-son of Benigon"];
+			character.race = "Rockman";
+			character.class = "Tarp-folder";
+			character.level = 1;
+			character.xp = 0;
+			character.gold = 0;
+			character.gossip = 0;
+			character.taskHistory = [];
+
+			onLoadCharacterSuccess(character);
+		}
+
+		loadCharacter();
 
 		return self;
 	}])
@@ -243,7 +279,7 @@ angular.module('App.Services', [])
 				'durationMillis' : completedTaskInstance.durationMillis,
 				'finishTime' : completedTaskInstance.finishTime,
 				'hasCompletionAnimationPlayed' : false,
-				'experience' : 10,
+				'xp' : 10,
 				'gold' : 15,
 				'gossip' : 25,
 				'items' : ['A Golden Toothpick'],

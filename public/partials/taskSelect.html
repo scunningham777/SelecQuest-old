@@ -1,6 +1,8 @@
-<h3>Behold! A list of tasks to choose from:</h3>
-<ul class="list-group">
-	<li ng-repeat="task in availableTasksList">
-		<a ng-click="taskSelected(task.id)">{{task.name}}</a>
-	</li>
-</ul>
+<div class="panel panel-default crawler-panel">
+	<div class="panel-heading"><h4>What would you like to do next?</h4></div>
+	<ul class="list-group">
+		<li ng-repeat="task in availableTasksList" class="list-group-item">
+			<div ng-click="taskSelected(task.id)">{{task.name}}</div>
+		</li>
+	</ul>
+</div>
