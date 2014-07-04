@@ -178,7 +178,7 @@ angular.module('App.Services', [])
 			var tasksList = {};
 			tasksList['111'] = {'name':"Free the dullard from the torture chamber.", 'durationMillis':5000, 'id':'111'};
 			tasksList['112'] = {'name':"Keep grandmother company.", 'durationMillis':20000, 'id':'112'};
-			tasksList['113'] = {'name':"Clear the rooftop of dire chickens.", 'durationMillis':7000, 'id':'113'};
+			tasksList['113'] = {'name':"Clear the rooftop of dire-chickens.", 'durationMillis':7000, 'id':'113'};
 
 			return tasksList;
 		}
@@ -239,6 +239,17 @@ angular.module('App.Services', [])
 			character.gold = 0;
 			character.gossip = 0;
 			character.taskHistory = [];
+			character.attributes = {
+				"Brawn":10,
+				"Flexibility":12,
+				"Coordination":16,
+				"Resilience":11,
+				"Wit":9,
+				"Knowledge":14,
+				"Test-taking Skills":17,
+				"People Skills":14
+			};
+
 
 			onLoadCharacterSuccess(character);
 		}
