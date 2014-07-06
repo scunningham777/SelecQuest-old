@@ -239,17 +239,33 @@ angular.module('App.Services', [])
 			character.gold = 0;
 			character.gossip = 0;
 			character.taskHistory = [];
-			character.attributes = {
-				"Brawn":10,
-				"Flexibility":12,
-				"Coordination":16,
-				"Resilience":11,
-				"Wit":9,
-				"Knowledge":14,
-				"Test-taking Skills":17,
-				"People Skills":14
-			};
-
+			character.attributes = [
+				{freindlyName:"Brawn", value:10},
+				{freindlyName:"Flexibility", value:12},
+				{freindlyName:"Coordination", value:16},
+				{freindlyName:"Resilience", value:11},
+				{freindlyName:"Wit", value:9},
+				{freindlyName:"Knowledge", value:14},
+				{freindlyName:"Test-taking Skills", value:17},
+				{freindlyName:"People Skills", value:14}
+			];
+			character.gear = [
+				{category:"weapon", friendlyName:"Turkish Tusk"},
+				{category:"cuirass", friendlyName:"Mahogany Shingle-mail"},
+				{category:"ring", friendlyName:"Ring of Big Crush"}
+			];
+			character.loot = [
+				{friendlyName:"Corded Pot", baseValue:3},
+				{friendlyName:"Hunk of Shiny Metal", baseValue:1}
+			];
+			character.spells = [
+				{friendlyName:"Tonguehairs", level:3},
+				{friendlyName:"Digest", level:5}
+			];
+			character.abilities = [
+				{friendlyName:"Slow Motion Run", level:3},
+				{friendlyName:"Somersault", level:1}
+			]
 
 			onLoadCharacterSuccess(character);
 		}
