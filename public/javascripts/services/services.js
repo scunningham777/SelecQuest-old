@@ -238,25 +238,45 @@ angular.module('App.Services', [])
 			character.xp = 0;
 			character.gold = 0;
 			character.gossip = 0;
+			character.maxEncumbrance = 15;
+			character.maxHp = 22;
 			character.taskHistory = [];
 			character.attributes = [
-				{freindlyName:"Brawn", value:10},
-				{freindlyName:"Flexibility", value:12},
-				{freindlyName:"Coordination", value:16},
-				{freindlyName:"Resilience", value:11},
-				{freindlyName:"Wit", value:9},
-				{freindlyName:"Knowledge", value:14},
-				{freindlyName:"Test-taking Skills", value:17},
-				{freindlyName:"People Skills", value:14}
+				{friendlyName:"Brawn", value:10},
+				{friendlyName:"Flexibility", value:122},
+				{friendlyName:"Coordination", value:1623},
+				{friendlyName:"Resilience", value:11},
+				{friendlyName:"Wit", value:9},
+				{friendlyName:"Knowledge", value:14},
+				{friendlyName:"Test-taking Skills", value:17},
+				{friendlyName:"People Skills", value:14}
 			];
 			character.gear = [
+				{category:"weapon", friendlyName:"Turkish Tusk"},
+				{category:"cuirass", friendlyName:"Mahogany Shingle-mail"},
+				{category:"weapon", friendlyName:"Turkish Tusk"},
+				{category:"cuirass", friendlyName:"Mahogany Shingle-mail"},
+				{category:"weapon", friendlyName:"Turkish Tusk"},
+				{category:"cuirass", friendlyName:"Mahogany Shingle-mail"},
+				{category:"weapon", friendlyName:"Turkish Tusk"},
+				{category:"cuirass", friendlyName:"Mahogany Shingle-mail"},
 				{category:"weapon", friendlyName:"Turkish Tusk"},
 				{category:"cuirass", friendlyName:"Mahogany Shingle-mail"},
 				{category:"ring", friendlyName:"Ring of Big Crush"}
 			];
 			character.loot = [
-				{friendlyName:"Corded Pot", baseValue:3},
-				{friendlyName:"Hunk of Shiny Metal", baseValue:1}
+				{friendlyName:"Corded Pot", baseValue:3, quantity:1},
+				{friendlyName:"Hunk of Shiny Metal", baseValue:1, quantity:2},
+				{friendlyName:"Corded Pot", baseValue:3, quantity:1},
+				{friendlyName:"Hunk of Shiny Metal", baseValue:1, quantity:2},
+				{friendlyName:"Corded Pot", baseValue:3, quantity:1},
+				{friendlyName:"Hunk of Shiny Metal", baseValue:1, quantity:2},
+				{friendlyName:"Corded Pot", baseValue:3, quantity:1},
+				{friendlyName:"Hunk of Shiny Metal", baseValue:1, quantity:2},
+				{friendlyName:"Corded Pot", baseValue:3, quantity:1},
+				{friendlyName:"Hunk of Shiny Metal", baseValue:1, quantity:2},
+				{friendlyName:"Corded Pot", baseValue:3, quantity:1},
+				{friendlyName:"Hunk of Shiny Metal", baseValue:1, quantity:2}
 			];
 			character.spells = [
 				{friendlyName:"Tonguehairs", level:3},
