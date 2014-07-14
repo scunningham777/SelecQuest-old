@@ -1,6 +1,6 @@
 <button type="button" class="btn btn-default" ng-click="goBack()">Back</button>
 
-<h3>Recent Achievements</h3>
+<h3>Recent Achievements:</h3>
 <ul class="list-group">
 	<li ng-repeat="taskResult in characterTaskResults | orderBy:'finishTime':true" class="list-group-item">
 		<h4>{{taskResult.name}}</h4>
@@ -9,3 +9,4 @@
 		<span class="label label-info">Gossip Points: {{taskResult.gossip}}</span>
 	</li>
 </ul>
+<div class="well" ng-show="0 == characterTaskResults.length">Hmm, nothing yet. So what are you waiting for? Do something with your life!</div>

@@ -186,7 +186,7 @@ angular.module('App.Services', [])
 		return self;
 	}])
 
-	.factory('characterManager', ['entityValidator', function(entityValidator) {
+	.factory('characterManager', ['entityValidator', 'utils', function(entityValidator, utils) {
 		var self = {};
 
 		var currentCharacter; 		//don't lazy load!
@@ -206,14 +206,67 @@ angular.module('App.Services', [])
 				}
 			}
 
-			currentCharacter.xp += newTaskResult.xp;
-			currentCharacter.gold += newTaskResult.gold;
-			currentCharacter.gossip += newTaskResult.gossip;
-
+			for (var property in newTaskResult.propertyAdjustments){
+				if (currentCharacter.hasOwnProperty(property)){
+					var value = newTaskResult.propertyAdjustments[property];
+					if ("number" === utils.typeOf(value)){
+						currentCharacter[property] += value;
+					}
+					else if ("array" === utils.typeOf(value)){
+						//currentCharacter[property] = currentCharacter[property].concat(value);
+						addCharacterPropertyObject(property, value);
+					}
+				}
+			}
+		
 			currentCharacter.taskHistory.push(newTaskResult);
+
+			if (50 < currentCharacter.taskHistory.length){
+				currentCharacter.taskHistory.splice(0,1);
+			}
 
 			if (onSuccess != null) {
 				onSuccess(newTaskResult);
+			}
+		}
+
+		function addCharacterPropertyObject(propertyName, value){
+			switch(propertyName){
+				case "attributes":
+					for (var attribute in value){
+						if (currentCharacter.attributes.hasOwnProperty(attribute)){
+							currentCharacter.attributes[attribute] += value[attribute];
+						}
+					}
+					break;
+				case "gear":
+					break;
+				case "loot":
+					for (var item in value){
+						if (currentCharacter.loot.hasOwnProperty(item)){
+							currentCharacter.loot[item].quantity += value[item].quantity;
+						}
+						else {
+							currentCharacter.loot.push(item);
+						}
+					}
+					break;
+				case "spells":
+					for (var spell in value){
+						if (currentCharacter.spells.hasOwnProperty(spell)){
+							currentCharacter.spells[spell].level += value[spell].level;
+						}
+						else {
+							currentCharacter.spells.push(spell);
+						}
+					}
+					break;
+				case "abilities":
+					break;
+				case "epithets":
+					break;
+				case "pedigree":
+					break;
 			}
 		}
 
@@ -239,6 +292,7 @@ angular.module('App.Services', [])
 			character.gold = 0;
 			character.gossip = 0;
 			character.maxEncumbrance = 15;
+			character.currentHp = 22;
 			character.maxHp = 22;
 			character.taskHistory = [];
 			character.attributes = [
@@ -326,11 +380,15 @@ angular.module('App.Services', [])
 				'durationMillis' : completedTaskInstance.durationMillis,
 				'finishTime' : completedTaskInstance.finishTime,
 				'hasCompletionAnimationPlayed' : false,
-				'xp' : 10,
-				'gold' : 15,
-				'gossip' : 25,
-				'items' : ['A Golden Toothpick'],
-				'skills' : ['Turtle Breath']
+				'doesResetHealth' : false,
+				'propertyAdjustments' : {
+					'xp' : 10,
+					'gold' : 15,
+					'gossip' : 25,
+					'loot' : [{friendlyName:'A Golden Toothpick', baseValue:2, quantity:1}],
+					'abilities' : [{friendlyName:'Turtle Breath', level:1}],
+					'currentHp' : -1
+				}
 			};
 
 
@@ -351,6 +409,20 @@ angular.module('App.Services', [])
 				    return false;
 				}
    			return true;
+		};
+
+		self.typeOf = function(value) {
+		    var s = typeof value;
+		    if (s === 'object') {
+		        if (value) {
+		            if (value instanceof Array) {
+		                s = 'array';
+		            }
+		        } else {
+		            s = 'null';
+		        }
+		    }
+		    return s;
 		};
 
 		return self;
