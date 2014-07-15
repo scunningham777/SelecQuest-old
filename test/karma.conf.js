@@ -13,6 +13,7 @@ files = [
   'public/lib/*/angular.js',
   'public/lib/*/angular-mocks.js',
   'public/lib/*/angular-ui-router.js',
+  'public/lib/bootstrap-custom/ui-bootstrap-custom-tpls-0.10.0.min.js',
   'public/javascripts/**/*.js',
   'public/javascripts/app.js',
   'test/unit/**/*.js',

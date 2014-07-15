@@ -233,39 +233,71 @@ angular.module('App.Services', [])
 		function addCharacterPropertyObject(propertyName, value){
 			switch(propertyName){
 				case "attributes":
-					for (var attribute in value){
-						if (currentCharacter.attributes.hasOwnProperty(attribute)){
-							currentCharacter.attributes[attribute] += value[attribute];
+					for (var i = 0; i < value.length; i++){
+						var existing = utils.search(currentCharacter.attributes, "friendlyName", value[i].friendlyName);
+						if (0 < existing.length){
+							existing.value += value.value;
 						}
 					}
 					break;
 				case "gear":
+					for (var i = 0; i < value.length; i++){
+						var existing = utils.search(currentCharacter.gear, "category", value[i].category);
+						if (0 < existing.length || (value[i].category == "ring" && 1 < existing.length)){
+							var gearTurnedLootAsArray = [{friendlyName:existing[0].friendlyName, baseValue:existing[0].baseValue?existing[0].baseValue:1, quantity:1}];
+							addCharacterPropertyObject("loot", gearTurnedLootAsArray);
+
+							//somehow remove existing[0] from currentCharacter.gear
+							currentCharacter.gear.splice(currentCharacter.indexOf(existing[0]), 1);
+						}
+					}
 					break;
 				case "loot":
-					for (var item in value){
-						if (currentCharacter.loot.hasOwnProperty(item)){
-							currentCharacter.loot[item].quantity += value[item].quantity;
+					for (var i = 0; i < value.length; i++){
+						var existing = utils.search(currentCharacter.loot, "friendlyName", value[i].friendlyName);
+						if (0 < existing.length){
+							existing[0].quantity += value[i].quantity;
 						}
 						else {
-							currentCharacter.loot.push(item);
+							currentCharacter.loot.push(value[i]);
 						}
 					}
 					break;
 				case "spells":
-					for (var spell in value){
-						if (currentCharacter.spells.hasOwnProperty(spell)){
-							currentCharacter.spells[spell].level += value[spell].level;
+					for (var i = 0; i < value.length; i++){
+						var existing = utils.search(currentCharacter.spells, "friendlyName", value[i].friendlyName);
+						if (0 < existing.length){
+							existing[0].level += value[i].level;
 						}
 						else {
-							currentCharacter.spells.push(spell);
+							currentCharacter.spells.push(value[i]);
 						}
 					}
 					break;
 				case "abilities":
+					for (var i = 0; i < value.length; i++){
+						var existing = utils.search(currentCharacter.abilities, "friendlyName", value[i].friendlyName);
+						if (0 < existing.length){
+							existing[0].level += value[i].level;
+						}
+						else {
+							currentCharacter.abilities.push(value[i]);
+						}
+					}
 					break;
 				case "epithets":
+					for (var i = 0; i < value.length; i++){
+						if (currentCharacter.epithets.indexOf(value[i]) == -1) {
+							currentCharacter.epithets.push(value[i]);
+						}
+					}
 					break;
 				case "pedigree":
+					for (var i = 0; i < value.length; i++){
+						if (currentCharacter.pedigree.indexOf(value[i]) == -1) {
+							currentCharacter.pedigree.push(value[i]);
+						}
+					}
 					break;
 			}
 		}
@@ -423,6 +455,16 @@ angular.module('App.Services', [])
 		        }
 		    }
 		    return s;
+		};
+
+		self.search = function(source, field, value) {
+			var results;
+
+			value = value.toUpperCase();
+			results = source.filter(function(entry) {
+				return entry[field].toUpperCase().indexOf(value) !== -1;
+			});
+			return results;
 		};
 
 		return self;

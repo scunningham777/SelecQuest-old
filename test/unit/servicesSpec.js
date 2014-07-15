@@ -17,6 +17,10 @@ describe('Crawler Quest Services', function() {
 		expect(taskSelectManager).not.to.equal(null);
 	}));
 
+	it('should contain a characterManager service', inject(function(characterManager) {
+		expect(characterManager).not.to.equal(null);
+	}));
+
 	it('should contain a utils service', inject(function(utils) {
 		expect(utils).not.to.equal(null);
 	}));
@@ -86,5 +90,61 @@ describe('Crawler Quest Services', function() {
 			expect(taskUpdateSpy).to.have.been.called();
 //			expect(taskCompleteSpy).to.have.been.called();
 		});
+	});
+
+	describe('utils service', function() {
+		var spells = [
+			{friendlyName:"Tonguehairs", level:3},
+			{friendlyName:"Digest", level:5}
+		];
+		it('should be able to find an object array entry based on a specific field', inject(function(utils) {
+			debugger
+			var results = utils.search(spells, "friendlyName", "Tonguehairs");
+
+			expect(results.length).to.equal(1);
+		}));
+
+		it('should not find an entry that doesn\'t exist', inject(function(utils) {
+			var results = utils.search(spells, "friendlyName", "Nonplus");
+			expect(results.length).to.equal(0);
+		}));
+
+		it('should return a reference to original objects', inject(function(utils) {
+			var results = utils.search(spells, "friendlyName", "Tonguehairs");
+
+			results[0].level += 1;
+
+			expect(spells[0].level).to.equal(4);
+		}));
+	});
+
+	describe('characterManager service', function() {
+		it('should add gear with new category', inject(function(characterManager) {
+			//need to be careful - this test is checking the results based on the count of the gear property, which could change
+			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(11);
+
+			var testResultsWithGear = {
+				propertyAdjustments: [
+					{category:"piercing", friendlyName:"Septum of Crackling"}
+				]
+			};
+			characterManager.addTaskResultToCharacterHistory(testResultsWithGear, null, null);
+
+			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(12);
+		}));
+
+		it('should add gear with existing category (second ring)', inject(function(characterManager) {
+			//need to be careful - this test is checking the results based on the count of the gear property, which could change
+			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(11);
+
+			var testResultsWithGear = {
+				propertyAdjustments: [
+					{category:"ring", friendlyName:"Ring of Crackling"}
+				]
+			};
+			characterManager.addTaskResultToCharacterHistory(testResultsWithGear, null, null);
+
+			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(12);
+		}));
 	});
 });
