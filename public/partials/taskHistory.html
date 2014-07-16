@@ -4,9 +4,9 @@
 <ul class="list-group">
 	<li ng-repeat="taskResult in characterTaskResults | orderBy:'finishTime':true" class="list-group-item">
 		<h4>{{taskResult.name}}</h4>
-		<span class="label label-success">XP: {{taskResult.xp}}</span>
-		<span class="label label-warning">Gold: {{taskResult.gold}}</span>
-		<span class="label label-info">Gossip Points: {{taskResult.gossip}}</span>
+		<span class="label label-success">XP: {{taskResult.propertyAdjustments.xp}}</span>
+		<span class="label label-warning">Gold: {{taskResult.propertyAdjustments.gold}}</span>
+		<span class="label label-info">Gossip Points: {{taskResult.propertyAdjustments.gossip}}</span>
 	</li>
 </ul>
 <div class="well" ng-show="0 == characterTaskResults.length">Hmm, nothing yet. So what are you waiting for? Do something with your life!</div>

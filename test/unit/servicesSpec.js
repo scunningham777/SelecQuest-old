@@ -98,7 +98,6 @@ describe('Crawler Quest Services', function() {
 			{friendlyName:"Digest", level:5}
 		];
 		it('should be able to find an object array entry based on a specific field', inject(function(utils) {
-			debugger
 			var results = utils.search(spells, "friendlyName", "Tonguehairs");
 
 			expect(results.length).to.equal(1);
@@ -118,15 +117,16 @@ describe('Crawler Quest Services', function() {
 		}));
 	});
 
+	//CURRENTLY ALL OF THESE TESTS ARE TIGHTLY COUPLED WITH CURRENT FAKE "DEFAULT" CHARACTER INFO
 	describe('characterManager service', function() {
 		it('should add gear with new category', inject(function(characterManager) {
 			//need to be careful - this test is checking the results based on the count of the gear property, which could change
 			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(11);
 
 			var testResultsWithGear = {
-				propertyAdjustments: [
-					{category:"piercing", friendlyName:"Septum of Crackling"}
-				]
+				propertyAdjustments: {
+					'gear':[{category:"piercing", friendlyName:"Septum of Crackling"}]
+				}
 			};
 			characterManager.addTaskResultToCharacterHistory(testResultsWithGear, null, null);
 
@@ -138,13 +138,31 @@ describe('Crawler Quest Services', function() {
 			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(11);
 
 			var testResultsWithGear = {
-				propertyAdjustments: [
-					{category:"ring", friendlyName:"Ring of Crackling"}
-				]
+				propertyAdjustments: {
+					'gear':[{category:"ring", friendlyName:"Ring of Crackling"}]
+				}
 			};
+
 			characterManager.addTaskResultToCharacterHistory(testResultsWithGear, null, null);
 
 			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(12);
+		}));
+
+		it('should replace gear with existing category (third ring)', inject(function(characterManager) {
+			//need to be careful - this test is checking the results based on the count of the gear property, which could change
+			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(11);
+			expect(characterManager.getCurrentCharacterDetails().loot.length).to.equal(12);
+
+			var testResultsWithGear = {
+				propertyAdjustments: {
+					'gear':[{category:"ring", friendlyName:"Ring of Crackling"}, {category:"ring", friendlyName:"Dull Wedding Band"}]
+				}
+			};
+//			debugger
+			characterManager.addTaskResultToCharacterHistory(testResultsWithGear, null, null);
+
+			expect(characterManager.getCurrentCharacterDetails().gear.length).to.equal(12);
+			expect(characterManager.getCurrentCharacterDetails().loot.length).to.equal(13);
 		}));
 	});
 });

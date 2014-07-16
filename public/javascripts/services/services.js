@@ -243,13 +243,16 @@ angular.module('App.Services', [])
 				case "gear":
 					for (var i = 0; i < value.length; i++){
 						var existing = utils.search(currentCharacter.gear, "category", value[i].category);
-						if (0 < existing.length || (value[i].category == "ring" && 1 < existing.length)){
+						if ((value[i].category != "ring" && 0 < existing.length) || 1 < existing.length){
 							var gearTurnedLootAsArray = [{friendlyName:existing[0].friendlyName, baseValue:existing[0].baseValue?existing[0].baseValue:1, quantity:1}];
 							addCharacterPropertyObject("loot", gearTurnedLootAsArray);
 
 							//somehow remove existing[0] from currentCharacter.gear
-							currentCharacter.gear.splice(currentCharacter.indexOf(existing[0]), 1);
+							currentCharacter.gear.splice(currentCharacter.gear.indexOf(existing[0]), 1);
 						}
+
+						currentCharacter.gear.push(value[i]);
+
 					}
 					break;
 				case "loot":
