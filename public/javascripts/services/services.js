@@ -396,7 +396,12 @@ angular.module('App.Services', [])
 				'startTime':startTime, 
 				'finishTime': finishTime.getTime(), 
 				'currentProgressPercent':0, 
-				'completionDelegate':completionDelegate
+				'completionDelegate':completionDelegate,
+                           'wasCompletedSuccessfully': false,
+                           'doesResetHealth': false,
+                           'primaryRewardCategory': "xp",
+                           'secondaryRewardCategory': "gossip",
+                           'percentChanceOfSpecialReward': 2
 			};
 			
 			return newTaskInstance;
