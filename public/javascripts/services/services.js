@@ -3,11 +3,11 @@
  */
 angular.module('App.Services', [])
 
-	.factory('gameStateManager', ['$state', '$rootScope', '$timeout', 'taskManager', 'taskInstanceFactory', 'taskResultGenerator', 'characterManager', function($state, $rootScope, $timeout, taskManager, taskInstanceFactory, taskResultGenerator, characterManager) {
+	.factory('gameStateManager', ['$state', '$rootScope', '$timeout', 'taskManager', 'taskInstanceGenerator', 'taskResultGenerator', 'characterManager', function($state, $rootScope, $timeout, taskManager, taskInstanceGenerator, taskResultGenerator, characterManager) {
 		var self = {};
 
 		self.newTaskSelected = function(selectedTask) {
-			var newTaskInstance = taskInstanceFactory.generateNewTaskInstance(selectedTask, new Date().getTime(), self.taskInstanceCompleted);
+			var newTaskInstance = taskInstanceGenerator.generateNewTaskInstance(selectedTask, new Date().getTime(), self.taskInstanceCompleted);
 
 			taskManager.startNewTaskInstance(newTaskInstance, startNewTaskSuccess, null);
 			
@@ -19,7 +19,8 @@ angular.module('App.Services', [])
 		
 		self.taskInstanceCompleted = function(completedTaskInstance) {
 			//pass completedTaskInstance and generateTaskResultsSuccess to taskResultGenerator service
-			taskResultGenerator.generateTaskResults(completedTaskInstance, true, generateTaskResultsSuccess, null);
+			completedTaskInstance.wasCompletedSuccessfully = true;
+			taskResultGenerator.generateTaskResults(completedTaskInstance, generateTaskResultsSuccess, null);
 			
 			function generateTaskResultsSuccess(taskResults){
 				//pass taskResults and saveTaskResultsSuccess to characterManager service
@@ -384,7 +385,7 @@ angular.module('App.Services', [])
 		return self;
 	}])
 
-	.factory('taskInstanceFactory', function(){
+	.factory('taskInstanceGenerator', function(){
 		var self = {};
 		
 		self.generateNewTaskInstance = function(newTask, startTime, completionDelegate) {
@@ -397,11 +398,11 @@ angular.module('App.Services', [])
 				'finishTime': finishTime.getTime(), 
 				'currentProgressPercent':0, 
 				'completionDelegate':completionDelegate,
-                           'wasCompletedSuccessfully': false,
-                           'doesResetHealth': false,
-                           'primaryRewardCategory': "xp",
-                           'secondaryRewardCategory': "gossip",
-                           'percentChanceOfSpecialReward': 2
+				'wasCompletedSuccessfully': false,
+				'doesResetHealth': false,
+				'primaryRewardCategory': "xp",
+				'secondaryRewardCategory': "gossip",
+				'percentChanceOfSpecialReward': 2
 			};
 			
 			return newTaskInstance;
@@ -410,25 +411,78 @@ angular.module('App.Services', [])
 		return self;
 	})
 
- 	.factory('taskResultGenerator', ['utils', function(utils) {
+	.factory('characterEntityGenerator', function() {
 		var self = {};
 
-		self.generateTaskResults = function(completedTaskInstance, wasCompletionSuccessful, onSuccess, onError) {
+		self.generateCharacterEntity = function(entityType) {
+			var newEntity = null;
+			var attributes = ['Brawn', 'Flexibility', 'Coordination', 'Resilience', 'Wit', 'Knowledge', 'Test-taking Skills', 'People Skills'];
+
+			swith(entityType) {
+				case "epithets":
+					newEntity = generateNewEpithet();
+					break;
+				case "maxHp":
+					newEntity = 1;
+					break;
+				case "maxEncumbrance":
+					newEntity = 1;
+					break;
+				case "attributes":
+					newEntity = {friendlyName: attributes[Math.floor(Math.random() * attributes.length)], value:1};
+					break;
+				case "gear":
+					newEntity = generateNewGear();
+					break;
+				case "loot":
+					newEntity = generateNewLoot();
+					break;
+				case "spells":
+					newEntity = generateNewSpell();
+					break;
+				case "abilities":
+					newEntity = generateNewAbility();
+					break;
+			}
+
+			return newEntity;
+		}
+
+		function generateNewEpithet() {
+			return null;
+		}
+
+		function generateNewGear() {
+			return null;
+		}
+
+		function generateNewLoot() {
+			return {friendlyName:'A Golden Toothpick', baseValue:2, quantity:1};
+		}
+
+		function generatenewSpell() {
+			return null;
+		}
+
+		function generateNewAbility() {
+			return {friendlyName:'Turtle Breath', level:1};
+		}
+
+		return self;
+	}
+
+ 	.factory('taskResultGenerator', ['utils', 'characterEntityGenerator', function(utils, characterEntityGenerator) {
+		var self = {};
+
+		self.generateTaskResults = function(completedTaskInstance, onSuccess, onError) {
 			var taskResults = {
 				'id' : completedTaskInstance.id,
 				'name' : completedTaskInstance.name,
 				'durationMillis' : completedTaskInstance.durationMillis,
 				'finishTime' : completedTaskInstance.finishTime,
 				'hasCompletionAnimationPlayed' : false,
-				'doesResetHealth' : false,
-				'propertyAdjustments' : {
-					'xp' : 10,
-					'gold' : 15,
-					'gossip' : 25,
-					'loot' : [{friendlyName:'A Golden Toothpick', baseValue:2, quantity:1}],
-					'abilities' : [{friendlyName:'Turtle Breath', level:1}],
-					'currentHp' : -1
-				}
+				'doesResetHealth' : completedTaskInstance.doesResetHealth,
+				'propertyAdjustments' : generatePropertyAdjustments(completedTaskInstance);
 			};
 
 
@@ -436,6 +490,74 @@ angular.module('App.Services', [])
 				onSuccess(taskResults);
 			}
 		};
+
+		function generatePropertyAdjustments(completedTaskInstance){
+			var propertyAdjustments = {};
+
+			var actualDurationMillis,
+			primaryRewardAdjustment, 
+			secondaryRewardAdjustment,
+			hpAdjustment;
+			var specialReward = null;
+
+
+			actualDurationMillis = completedTaskInstance.finishTime - completedTaskInstance.startTime;
+
+			primaryRewardAdjustment = Math.round(actualDurationMillis / 1000);
+			secondaryRewardAdjustment = Math.round(primaryRewardAdjustment / 5);
+
+			if (completedTaskInstance.wasCompletedSuccessfully == true && isSpecialRewardGranted(completedTaskInstance.percentChanceOfSpecialReward)) {
+				specialReward = determineSpecialReward(completedTaskInstance);
+			}
+
+			if (completedTaskInstance.primaryRewardCategory == "xp") {
+				hpAdjustment = Math.ceiling(primaryRewardAdjustment) * -1;
+			} 
+			else if (completedTaskInstance.secondaryRewardCategory == "xp") {
+				hpAdjustment = Math.ceiling(secondaryRewardAdjustment) * -1;
+			}
+			else {
+				hpAdjustment = 0;
+			}
+
+			propertyAdjustments.currentHp = hpAdjustment;
+			propertyAdjustments[completedTaskInstance.primaryRewardCategory] = primaryRewardAdjustment;
+			propertyAdjustments[completedTaskInstance.secondaryRewardCategory] = secondaryRewardAdjustment;
+			if (specialReward != null) {
+				propertyAdjustments[specialReward.rewardType] = specialReward.rewardValue;
+			}
+
+			return propertyAdjustments;
+		}
+
+		function isSpecialRewardGranted(percentChanceOfSpecialReward) {
+			if ((Math.random() * 100) < percentChanceOfSpecialReward) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+
+		function determineSpecialReward(completedTaskInstance) {
+			var eligibleRewardTypes = ["epithets", "maxHp", "maxEncumbrance", "attributes", "gear", "loot", "spells", "abilities"];
+			var specialReward = {};
+			var specialRewardEntity;
+
+			specialReward.rewardType = Math.floor(Math.random() * eligibleRewardTypes.length);
+
+			specialRewardEntity = characterEntityGenerator.generateCharacterEntity(specialReward.rewardType);
+
+			if (specialReward.rewardType == "maxHp" || specialReward.rewardType == "maxEncumbrance") {
+				specialReward.rewardValue = specialRewardEntity;
+			}
+			else {
+				specialReward.rewardValue = [];
+				specialReward.rewardValue.push(specialRewardEntity);
+			}
+
+			return specialReward;
+		}
 
 		return self;
 	}])
