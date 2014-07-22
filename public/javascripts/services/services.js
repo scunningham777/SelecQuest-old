@@ -418,7 +418,7 @@ angular.module('App.Services', [])
 			var newEntity = null;
 			var attributes = ['Brawn', 'Flexibility', 'Coordination', 'Resilience', 'Wit', 'Knowledge', 'Test-taking Skills', 'People Skills'];
 
-			swith(entityType) {
+			switch(entityType) {
 				case "epithets":
 					newEntity = generateNewEpithet();
 					break;
@@ -445,15 +445,17 @@ angular.module('App.Services', [])
 					break;
 			}
 
+			console.log("new " + entityType + " created!");
+
 			return newEntity;
 		}
 
 		function generateNewEpithet() {
-			return null;
+			return "Ruby-throated";
 		}
 
 		function generateNewGear() {
-			return null;
+			return {category:"weapon", friendlyName:"Taserclaw"};
 		}
 
 		function generateNewLoot() {
@@ -461,7 +463,7 @@ angular.module('App.Services', [])
 		}
 
 		function generatenewSpell() {
-			return null;
+			return {friendlyName:"Doubleflush", level:1};
 		}
 
 		function generateNewAbility() {
@@ -469,12 +471,14 @@ angular.module('App.Services', [])
 		}
 
 		return self;
-	}
+	})
 
  	.factory('taskResultGenerator', ['utils', 'characterEntityGenerator', function(utils, characterEntityGenerator) {
 		var self = {};
 
 		self.generateTaskResults = function(completedTaskInstance, onSuccess, onError) {
+			var propertyAdjustments = generatePropertyAdjustments(completedTaskInstance);
+
 			var taskResults = {
 				'id' : completedTaskInstance.id,
 				'name' : completedTaskInstance.name,
@@ -482,7 +486,7 @@ angular.module('App.Services', [])
 				'finishTime' : completedTaskInstance.finishTime,
 				'hasCompletionAnimationPlayed' : false,
 				'doesResetHealth' : completedTaskInstance.doesResetHealth,
-				'propertyAdjustments' : generatePropertyAdjustments(completedTaskInstance);
+				'propertyAdjustments' : propertyAdjustments
 			};
 
 
@@ -506,15 +510,19 @@ angular.module('App.Services', [])
 			primaryRewardAdjustment = Math.round(actualDurationMillis / 1000);
 			secondaryRewardAdjustment = Math.round(primaryRewardAdjustment / 5);
 
-			if (completedTaskInstance.wasCompletedSuccessfully == true && isSpecialRewardGranted(completedTaskInstance.percentChanceOfSpecialReward)) {
+			//TODO: basic loot should be generated with every task that has gold as primary or secondary reward
+			//TODO: if special loot is generated as special reward, this should replace basic loot
+
+			var doesGetSpecialReward = isSpecialRewardGranted(completedTaskInstance.percentChanceOfSpecialReward)
+			if (completedTaskInstance.wasCompletedSuccessfully == true && doesGetSpecialReward) {
 				specialReward = determineSpecialReward(completedTaskInstance);
 			}
 
 			if (completedTaskInstance.primaryRewardCategory == "xp") {
-				hpAdjustment = Math.ceiling(primaryRewardAdjustment) * -1;
+				hpAdjustment = Math.ceil(primaryRewardAdjustment) * -1;
 			} 
 			else if (completedTaskInstance.secondaryRewardCategory == "xp") {
-				hpAdjustment = Math.ceiling(secondaryRewardAdjustment) * -1;
+				hpAdjustment = Math.ceil(secondaryRewardAdjustment) * -1;
 			}
 			else {
 				hpAdjustment = 0;
@@ -528,16 +536,17 @@ angular.module('App.Services', [])
 			}
 
 			return propertyAdjustments;
-		}
+		};
 
 		function isSpecialRewardGranted(percentChanceOfSpecialReward) {
-			if ((Math.random() * 100) < percentChanceOfSpecialReward) {
+			var randomResult = Math.random() * 100;
+			if (randomResult < percentChanceOfSpecialReward) {
 				return true;
 			}
 			else {
 				return false;
 			}
-		}
+		};
 
 		function determineSpecialReward(completedTaskInstance) {
 			var eligibleRewardTypes = ["epithets", "maxHp", "maxEncumbrance", "attributes", "gear", "loot", "spells", "abilities"];
@@ -557,7 +566,7 @@ angular.module('App.Services', [])
 			}
 
 			return specialReward;
-		}
+		};
 
 		return self;
 	}])
