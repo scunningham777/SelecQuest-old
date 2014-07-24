@@ -401,7 +401,7 @@ angular.module('App.Services', [])
 				'wasCompletedSuccessfully': false,
 				'doesResetHealth': false,
 				'primaryRewardCategory': "xp",
-				'secondaryRewardCategory': "gossip",
+				'secondaryRewardCategory': "gold",
 				'percentChanceOfSpecialReward': 2
 			};
 			
@@ -459,7 +459,15 @@ angular.module('App.Services', [])
 		}
 
 		function generateNewLoot() {
-			return {friendlyName:'A Golden Toothpick', baseValue:2, quantity:1};
+			switch (Math.floor(Math.random() * 2)) {
+				case 0:
+					return {friendlyName:'A Golden Toothpick', baseValue:2, quantity:1};
+					break;
+				case 1:
+					return {friendlyName:'Pretty Rope', baseValue:1, quantity:1};
+					break;
+			}
+			
 		}
 
 		function generatenewSpell() {
@@ -503,6 +511,7 @@ angular.module('App.Services', [])
 			secondaryRewardAdjustment,
 			hpAdjustment;
 			var specialReward = null;
+			var lootAcquired = [];
 
 
 			actualDurationMillis = completedTaskInstance.finishTime - completedTaskInstance.startTime;
@@ -521,22 +530,41 @@ angular.module('App.Services', [])
 			if (completedTaskInstance.primaryRewardCategory == "xp") {
 				hpAdjustment = Math.ceil(primaryRewardAdjustment) * -1;
 			} 
-			else if (completedTaskInstance.secondaryRewardCategory == "xp") {
+			if (completedTaskInstance.secondaryRewardCategory == "xp") {
 				hpAdjustment = Math.ceil(secondaryRewardAdjustment) * -1;
 			}
-			else {
-				hpAdjustment = 0;
+
+			if ("gold" == completedTaskInstance.primaryRewardCategory) {
+				lootAcquired = determineStandardLoot(primaryRewardAdjustment);
+			}
+			if ("gold" == completedTaskInstance.secondaryRewardCategory) {
+				lootAcquired = lootAcquired.concat(determineStandardLoot(secondaryRewardAdjustment));
 			}
 
 			propertyAdjustments.currentHp = hpAdjustment;
-			propertyAdjustments[completedTaskInstance.primaryRewardCategory] = primaryRewardAdjustment;
-			propertyAdjustments[completedTaskInstance.secondaryRewardCategory] = secondaryRewardAdjustment;
+
+			if ("gold" != completedTaskInstance.primaryRewardCategory) {
+				propertyAdjustments[completedTaskInstance.primaryRewardCategory] = primaryRewardAdjustment;
+			}
+			if ("gold" != completedTaskInstance.secondaryRewardCategory) {
+				propertyAdjustments[completedTaskInstance.secondaryRewardCategory] = secondaryRewardAdjustment;
+			}
+
+			if (0 < lootAcquired.length) {
+				propertyAdjustments.loot = lootAcquired;
+			}
+
 			if (specialReward != null) {
+				//this will replace "standard loot" if special reward type is "loot", which is what we want
 				propertyAdjustments[specialReward.rewardType] = specialReward.rewardValue;
 			}
 
 			return propertyAdjustments;
 		};
+
+		function determineStandardLoot(lootValue) {
+			return characterEntityGenerator.generateCharacterEntity("loot");
+		}
 
 		function isSpecialRewardGranted(percentChanceOfSpecialReward) {
 			var randomResult = Math.random() * 100;
