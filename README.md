@@ -1,5 +1,5 @@
 SelecQuest
 
-A timer-based roguelike inspired by ProgressQuest. 
+A timer-based rpg inspired by ProgressQuest. 
 
 Currently in early development.
