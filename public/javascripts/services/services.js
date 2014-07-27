@@ -237,19 +237,20 @@ angular.module('App.Services', [])
 					for (var i = 0; i < value.length; i++){
 						var existing = utils.search(currentCharacter.attributes, "friendlyName", value[i].friendlyName);
 						if (0 < existing.length){
-							existing.value += value.value;
+							existing[0].value += value[i].value;
 						}
 					}
 					break;
 				case "gear":
 					for (var i = 0; i < value.length; i++){
 						var existing = utils.search(currentCharacter.gear, "category", value[i].category);
-						if ((value[i].category != "ring" && 0 < existing.length) || 1 < existing.length){
-							var gearTurnedLootAsArray = [{friendlyName:existing[0].friendlyName, baseValue:existing[0].baseValue?existing[0].baseValue:1, quantity:1}];
+						var numExistingAllowed = (value[i].category == "ring")?1:0
+						for (var j = 0; j < (existing.length - numExistingAllowed); j++){
+							var gearTurnedLootAsArray = [{friendlyName:existing[j].friendlyName, baseValue:existing[j].baseValue?existing[j].baseValue:1, quantity:1}];
 							addCharacterPropertyObject("loot", gearTurnedLootAsArray);
 
 							//somehow remove existing[0] from currentCharacter.gear
-							currentCharacter.gear.splice(currentCharacter.gear.indexOf(existing[0]), 1);
+							currentCharacter.gear.splice(currentCharacter.gear.indexOf(existing[j]), 1);
 						}
 
 						currentCharacter.gear.push(value[i]);
@@ -330,6 +331,8 @@ angular.module('App.Services', [])
 			character.maxEncumbrance = 15;
 			character.currentHp = 22;
 			character.maxHp = 22;
+			character.currentMp = 11;
+			character.maxMp = 11;
 			character.taskHistory = [];
 			character.attributes = [
 				{friendlyName:"Brawn", value:10},
@@ -402,7 +405,7 @@ angular.module('App.Services', [])
 				'doesResetHealth': false,
 				'primaryRewardCategory': "xp",
 				'secondaryRewardCategory': "gold",
-				'percentChanceOfSpecialReward': 2
+				'percentChanceOfSpecialReward': 20
 			};
 			
 			return newTaskInstance;
@@ -423,6 +426,9 @@ angular.module('App.Services', [])
 					newEntity = generateNewEpithet();
 					break;
 				case "maxHp":
+					newEntity = 1;
+					break;
+				case "maxMp":
 					newEntity = 1;
 					break;
 				case "maxEncumbrance":
@@ -470,7 +476,7 @@ angular.module('App.Services', [])
 			
 		}
 
-		function generatenewSpell() {
+		function generateNewSpell() {
 			return {friendlyName:"Doubleflush", level:1};
 		}
 
@@ -518,9 +524,6 @@ angular.module('App.Services', [])
 
 			primaryRewardAdjustment = Math.round(actualDurationMillis / 1000);
 			secondaryRewardAdjustment = Math.round(primaryRewardAdjustment / 5);
-
-			//TODO: basic loot should be generated with every task that has gold as primary or secondary reward
-			//TODO: if special loot is generated as special reward, this should replace basic loot
 
 			var doesGetSpecialReward = isSpecialRewardGranted(completedTaskInstance.percentChanceOfSpecialReward)
 			if (completedTaskInstance.wasCompletedSuccessfully == true && doesGetSpecialReward) {
@@ -577,15 +580,15 @@ angular.module('App.Services', [])
 		};
 
 		function determineSpecialReward(completedTaskInstance) {
-			var eligibleRewardTypes = ["epithets", "maxHp", "maxEncumbrance", "attributes", "gear", "loot", "spells", "abilities"];
+			var eligibleRewardTypes = ["epithets", "maxHp", "maxMp", "maxEncumbrance", "attributes", "gear", "loot", "spells", "abilities"];
 			var specialReward = {};
 			var specialRewardEntity;
 
-			specialReward.rewardType = Math.floor(Math.random() * eligibleRewardTypes.length);
+			specialReward.rewardType = eligibleRewardTypes[Math.floor(Math.random() * eligibleRewardTypes.length)];
 
 			specialRewardEntity = characterEntityGenerator.generateCharacterEntity(specialReward.rewardType);
 
-			if (specialReward.rewardType == "maxHp" || specialReward.rewardType == "maxEncumbrance") {
+			if (specialReward.rewardType == "maxHp" || specialReward.rewardType == "maxEncumbrance" || specialReward.rewardType == "maxMp") {
 				specialReward.rewardValue = specialRewardEntity;
 			}
 			else {

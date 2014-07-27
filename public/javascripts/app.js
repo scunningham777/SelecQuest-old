@@ -14,6 +14,7 @@ angular.module('crawlerQuestApp', ['ui.router', 'App.Controllers', 'App.Services
         		controller: ['$scope', '$state', 'taskManager', 'characterManager', function($scope, $state, taskManager, characterManager){
         			$scope.currentCharacter = characterManager.getCurrentCharacterDetails();
         			$scope.characterDetailsExpanded = false;
+                    
         			if (taskManager.hasActiveTask()) {
         				$state.go('crawler.activeTask');
         			}
